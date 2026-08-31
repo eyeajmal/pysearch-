@@ -1,0 +1,60 @@
+.result-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: #0d1520;
+  border: 1px solid #1a2a3a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.card-content {
+  flex: 1;
+  min-width: 0; /* Prevents text from breaking flexbox width */
+}
+
+.result-url {
+  font-size: 0.75rem;
+  color: #00e5ff;
+  text-decoration: none;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncates long URLs cleanly */
+  margin-bottom: 4px;
+}
+
+.result-title {
+  color: #ffffff;
+  font-size: 1.15rem;
+  margin: 0 0 8px 0;
+}
+
+.result-snippet {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Thumbnail styling */
+.result-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #00e5ff44;
+}
+
+.thumb-placeholder {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111d2b;
+  border-radius: 8px;
+  font-size: 1.5rem;
+}
