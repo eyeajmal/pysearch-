@@ -4,9 +4,8 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-app = FastAPI(title="PySearch Knowledge Engine")
+app = FastAPI(title="PySearch")
 
-# CORS middleware for open accessibility
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,105 +14,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Wikipedia API headers
 HEADERS = {
     "User-Agent": "PySearchBot/1.0 (https://render.com; pysearch@example.com)"
 }
 
-@app.get("/api/search")
-def search_engine(q: str = Query(..., min_length=1)):
-    clean_query = q.strip()
-    
-    # Step 1: Find best matching Wikipedia title
-    search_url = "https://en.wikipedia.org/w/api.php"
-    search_params = {
-        "action": "query",
-        "list": "search",
-        "srsearch": clean_query,
-        "format": "json"
-    }
-
-    try:
-        search_res = requests.get(search_url, params=search_params, headers=HEADERS, timeout=8).json()
-        search_results = search_res.get("query", {}).get("search", [])
-
-        if not search_results:
-            return {
-                "status": "error",
-                "message": f"'{clean_query}' ke liye koi result nahi mila. Kripya dusra keyword try karein."
-            }
-
-        title = search_results[0]["title"]
-
-        # Step 2: Fetch Page Summary & Related Links
-        page_url = "https://en.wikipedia.org/w/api.php"
-        page_params = {
-            "action": "query",
-            "prop": "extracts|links",
-            "exintro": True,
-            "explaintext": True,
-            "titles": title,
-            "pllimit": 15,
-            "format": "json"
-        }
-
-        page_res = requests.get(page_url, params=page_params, headers=HEADERS, timeout=8).json()
-        pages = page_res.get("query", {}).get("pages", {})
-        
-        page_data = next(iter(pages.values()))
-        extract = page_data.get("extract", "").strip()
-
-        if not extract:
-            return {
-                "status": "error",
-                "message": f"'{title}' ki summary retrieve nahi ho saki."
-            }
-
-        # 3-Layer Processing: TL;DR & Highlights
-        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', extract) if len(s.strip()) > 10]
-        
-        # Layer 1: TL;DR
-        tldr = " ".join(sentences[:2]) if len(sentences) >= 2 else extract
-
-        # Layer 2: Key Facts / Highlights
-        key_facts = sentences[2:6] if len(sentences) > 2 else ["Detailed overview available in full source."]
-
-        # Layer 3: Related Knowledge Nodes
-        raw_links = page_data.get("links", [])
-        related_nodes = [
-            item["title"] for item in raw_links 
-            if not item["title"].startswith("Template:") and not item["title"].startswith("Category:") and len(item["title"]) < 25
-        ][:6]
-
-        encoded_title = title.replace(" ", "_")
-        source_url = f"https://en.wikipedia.org/wiki/{encoded_title}"
-
-        return {
-            "status": "success",
-            "title": title,
-            "tldr": tldr,
-            "key_facts": key_facts,
-            "related_nodes": related_nodes,
-            "source_url": source_url
-        }
-
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"Server Error: {str(e)}"
-        }
-
-
-# Direct HTML UI route - No static folder path errors
+# 1. ROOT ROUTE (Ye homepage UI load karega)
 @app.get("/", response_class=HTMLResponse)
-def serve_ui():
+def home():
     return """
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>PySearch - Ultra Fast Knowledge Engine</title>
+        <title>PySearch - Knowledge Engine</title>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -182,9 +96,7 @@ def serve_ui():
                 background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2);
                 color: #38bdf8; padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;
             }
-            .node-pill:hover { background: rgba(56, 189, 248, 0.2); }
             .source-link { display: inline-block; margin-top: 18px; color: #ec4899; font-size: 0.85rem; text-decoration: none; }
-            .source-link:hover { text-decoration: underline; }
             .loader {
                 display: none; width: 26px; height: 26px; border: 3px solid rgba(255,255,255,0.2);
                 border-radius: 50%; border-top-color: #38bdf8; animation: spin 0.8s linear infinite; margin: 20px auto;
@@ -199,7 +111,7 @@ def serve_ui():
             <p class="subtitle">Search anything across the universe. No cap, pure signal.</p>
 
             <div class="search-box">
-                <input type="text" id="queryInput" class="search-input" placeholder="Search anything (e.g. Virat Kohli, Python, SpaceX)...">
+                <input type="text" id="queryInput" class="search-input" placeholder="Search anything (e.g. Virat Kohli, Python)...">
                 <button class="search-btn" onclick="performSearch()">Search 🚀</button>
             </div>
 
@@ -208,23 +120,18 @@ def serve_ui():
                 <span class="tag" onclick="quickSearch('Artificial intelligence')">🤖 AI</span>
                 <span class="tag" onclick="quickSearch('Python programming')">🐍 Python</span>
                 <span class="tag" onclick="quickSearch('SpaceX')">🚀 SpaceX</span>
-                <span class="tag" onclick="quickSearch('Narendra Modi')">🇮🇳 Narendra Modi</span>
             </div>
 
             <div class="loader" id="loader"></div>
 
             <div class="result-card" id="resultCard">
                 <div class="result-title" id="resTitle"></div>
-                
                 <div class="section-heading">⚡ 10-Second TL;DR</div>
                 <p class="tldr-text" id="resTldr"></p>
-
                 <div class="section-heading">📌 Key Takeaways</div>
                 <ul class="facts-list" id="resFacts"></ul>
-
                 <div class="section-heading">🕸️ Related Knowledge Nodes</div>
                 <div class="nodes-container" id="resNodes"></div>
-
                 <a href="#" id="resLink" target="_blank" class="source-link">Read Full Encyclopedia Source ↗</a>
             </div>
         </div>
@@ -234,9 +141,7 @@ def serve_ui():
             const loader = document.getElementById("loader");
             const resultCard = document.getElementById("resultCard");
 
-            queryInput.addEventListener("keypress", function(e) {
-                if (e.key === "Enter") performSearch();
-            });
+            queryInput.addEventListener("keypress", (e) => { if (e.key === "Enter") performSearch(); });
 
             function quickSearch(term) {
                 queryInput.value = term;
@@ -294,3 +199,61 @@ def serve_ui():
     </body>
     </html>
     """
+
+# 2. SEARCH API ROUTE
+@app.get("/api/search")
+def search_engine(q: str = Query(..., min_length=1)):
+    clean_query = q.strip()
+    search_url = "https://en.wikipedia.org/w/api.php"
+    search_params = {
+        "action": "query",
+        "list": "search",
+        "srsearch": clean_query,
+        "format": "json"
+    }
+
+    try:
+        search_res = requests.get(search_url, params=search_params, headers=HEADERS, timeout=8).json()
+        search_results = search_res.get("query", {}).get("search", [])
+
+        if not search_results:
+            return {"status": "error", "message": f"'{clean_query}' ke liye koi result nahi mila."}
+
+        title = search_results[0]["title"]
+
+        page_url = "https://en.wikipedia.org/w/api.php"
+        page_params = {
+            "action": "query",
+            "prop": "extracts|links",
+            "exintro": True,
+            "explaintext": True,
+            "titles": title,
+            "pllimit": 15,
+            "format": "json"
+        }
+
+        page_res = requests.get(page_url, params=page_params, headers=HEADERS, timeout=8).json()
+        pages = page_res.get("query", {}).get("pages", {})
+        page_data = next(iter(pages.values()))
+        extract = page_data.get("extract", "").strip()
+
+        sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', extract) if len(s.strip()) > 10]
+        tldr = " ".join(sentences[:2]) if len(sentences) >= 2 else extract
+        key_facts = sentences[2:6] if len(sentences) > 2 else ["Full details available in encyclopedia."]
+        
+        raw_links = page_data.get("links", [])
+        related_nodes = [
+            item["title"] for item in raw_links 
+            if not item["title"].startswith("Template:") and not item["title"].startswith("Category:") and len(item["title"]) < 25
+        ][:6]
+
+        return {
+            "status": "success",
+            "title": title,
+            "tldr": tldr,
+            "key_facts": key_facts,
+            "related_nodes": related_nodes,
+            "source_url": f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}"
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
