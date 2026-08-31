@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PySearch - Fast Web Explorer</title>
-    <!-- Google Font: Inter & Outfit -->
+    <title>PySearch - Ultra Fast Knowledge Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --surface-color: #111827;
-            --surface-hover: #162033;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-focus: #00e5ff;
-            --accent-cyan: #00e5ff;
-            --accent-pink: #ec4899;
-            --text-primary: #f9fafb;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
+            --bg-gradient: radial-gradient(circle at 50% 20%, #1a0b2e 0%, #080d1a 60%, #030712 100%);
+            --accent-cyan: #00f2fe;
+            --accent-purple: #9d4edd;
+            --accent-pink: #ff007f;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --card-bg: rgba(17, 24, 39, 0.7);
         }
 
         * {
@@ -30,267 +26,225 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            background-color: #030712;
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 24px 16px;
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
+            padding: 24px 16px;
         }
 
-        .container {
+        .hero-container {
             width: 100%;
-            max-width: 740px;
-        }
-
-        /* Header & Logo */
-        .header {
+            max-width: 680px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
+            text-align: center;
         }
 
-        .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 26px;
-            font-weight: 800;
-            color: #ffffff;
-            text-decoration: none;
-            letter-spacing: -0.5px;
-            display: flex;
+        /* Top Pill Badge */
+        .top-badge {
+            display: inline-flex;
             align-items: center;
-            gap: 2px;
-        }
-
-        .logo span {
+            gap: 6px;
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.3);
             color: var(--accent-cyan);
-            text-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
-        }
-
-        /* Modern Glowing Search Box */
-        .search-box {
-            display: flex;
-            flex: 1;
-            min-width: 260px;
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
+            padding: 6px 16px;
             border-radius: 9999px;
-            padding: 4px;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            box-shadow: 0 0 16px rgba(0, 242, 254, 0.15);
         }
 
-        .search-box:focus-within {
-            border-color: var(--border-focus);
-            box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
+        /* Gradient Logo Title */
+        .brand-title {
+            font-size: clamp(2.5rem, 7vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 35%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
         }
 
-        .search-box input {
+        .tagline {
+            font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+            color: var(--text-secondary);
+            max-width: 440px;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+
+        /* Responsive Search Bar Container */
+        .search-form {
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            border-radius: 9999px;
+            padding: 6px 8px 6px 20px;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.15);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(12px);
+        }
+
+        .search-form:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 35px rgba(0, 242, 254, 0.35);
+        }
+
+        .search-input {
             flex: 1;
+            min-width: 0;
             background: transparent;
             border: none;
             outline: none;
-            padding: 10px 18px;
+            color: #ffffff;
             font-size: 15px;
-            color: var(--text-primary);
             font-family: inherit;
+            padding: 8px 4px;
         }
 
-        .search-box input::placeholder {
-            color: var(--text-muted);
+        .search-input::placeholder {
+            color: #64748b;
         }
 
-        .search-box button {
-            background: linear-gradient(135deg, var(--accent-cyan), #00a3ff);
-            color: #0b0f19;
+        .search-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4f46e5 100%);
+            color: #ffffff;
             border: none;
             outline: none;
-            padding: 10px 24px;
             font-size: 14px;
             font-weight: 700;
+            padding: 12px 22px;
             border-radius: 9999px;
             cursor: pointer;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
             transition: transform 0.15s ease, filter 0.2s ease;
         }
 
-        .search-box button:hover {
-            filter: brightness(1.1);
+        .search-btn:hover {
+            filter: brightness(1.15);
             transform: scale(1.02);
         }
 
-        .search-box button:active {
-            transform: scale(0.98);
+        .search-btn:active {
+            transform: scale(0.97);
         }
 
-        /* Results Meta Info */
-        .search-meta {
+        /* Suggestion Chips */
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 24px;
+            width: 100%;
+        }
+
+        .chip {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            padding: 8px 14px;
+            border-radius: 9999px;
             font-size: 13px;
             font-weight: 500;
-            color: var(--accent-cyan);
-            margin-bottom: 20px;
-            padding-left: 4px;
-            letter-spacing: 0.2px;
-        }
-
-        /* Result Cards */
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 18px 20px;
-            margin-bottom: 16px;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .result-item:hover {
-            background: var(--surface-hover);
-            border-color: rgba(0, 229, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        .result-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .result-item .url {
-            font-size: 12px;
-            color: var(--accent-cyan);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 6px;
-            opacity: 0.85;
-        }
-
-        .result-item a.title {
-            font-family: 'Outfit', sans-serif;
-            color: #ffffff;
-            font-size: 19px;
-            font-weight: 700;
+            cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            margin-bottom: 8px;
-            line-height: 1.3;
-            transition: color 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
         }
 
-        .result-item a.title:hover {
-            color: var(--accent-cyan);
+        .chip:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: var(--accent-cyan);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 242, 254, 0.15);
         }
 
-        .result-item .snippet {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.55;
-        }
-
-        /* Thumbnail Image on the Right */
-        .result-media {
-            flex-shrink: 0;
-        }
-
-        .result-thumb {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: #1f2937;
-        }
-
-        /* Score Badge */
-        .badge {
-            display: inline-block;
-            background: rgba(0, 229, 255, 0.1);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(0, 229, 255, 0.25);
-            padding: 2px 7px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        /* Empty / Initial State */
-        .empty-state {
-            margin-top: 50px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        .empty-state code {
-            background: var(--surface-color);
-            color: var(--accent-cyan);
-            padding: 3px 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            font-size: 13px;
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            .search-form {
+                padding: 4px 6px 4px 14px;
+            }
+            .search-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            .chip {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <a href="/" class="logo">PySearch<span>⚡</span></a>
-            <form class="search-box" action="/" method="GET">
-                <input type="text" name="q" value="{{ query }}" placeholder="Search web or Wikipedia..." required autofocus autocomplete="off">
-                <button type="submit">Search</button>
-            </form>
+    <div class="hero-container">
+        <!-- Top Feature Tag -->
+        <div class="top-badge">
+            ⚡ Ultra Fast Knowledge Engine
         </div>
 
-        <!-- Results Area -->
-        <div class="results-container">
-            {% if query %}
-                {% if results %}
-                    <div class="search-meta">
-                        Found {{ results|length }} verified entities for "{{ query }}"
-                    </div>
-                    {% for res in results %}
-                        <div class="result-item">
-                            <div class="result-content">
-                                <div class="url">
-                                    {{ res.url }}
-                                    {% if res.score %}
-                                        <span class="badge">Score: {{ res.score }}</span>
-                                    {% endif %}
-                                </div>
-                                <a class="title" href="{{ res.url }}" target="_blank">{{ res.title }}</a>
-                                <p class="snippet">{{ res.snippet | safe }}</p>
-                            </div>
-                            
-                            {% if res.thumbnail %}
-                                <div class="result-media">
-                                    <img src="{{ res.thumbnail }}" alt="{{ res.title }}" class="result-thumb" loading="lazy">
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        No results found for "<b>{{ query }}</b>".
-                    </div>
-                {% endif %}
-            {% else %}
-                <div class="empty-state">
-                    Type a query like <code>Python</code>, <code>Quantum Computing</code>, or <code>Photosynthesis</code> to explore.
-                </div>
-            {% endif %}
+        <!-- Main Title -->
+        <h1 class="brand-title">PySearch</h1>
+        <p class="tagline">Search anything across the universe. No cap, pure signal.</p>
+
+        <!-- Search Box -->
+        <form class="search-form" action="/" method="GET" id="searchForm">
+            <input 
+                type="text" 
+                name="q" 
+                id="queryInput"
+                class="search-input" 
+                placeholder="Search anyone (e.g. Virat Kohli)..." 
+                required 
+                autofocus 
+                autocomplete="off"
+            >
+            <button type="submit" class="search-btn">
+                Search 🚀
+            </button>
+        </form>
+
+        <!-- Clickable Suggestion Chips -->
+        <div class="chips-container">
+            <button type="button" class="chip" onclick="setQuery('Virat Kohli')">🏏 Virat Kohli</button>
+            <button type="button" class="chip" onclick="setQuery('Artificial Intelligence')">🤖 AI & Future</button>
+            <button type="button" class="chip" onclick="setQuery('Narendra Modi')">🇮🇳 Narendra Modi</button>
+            <button type="button" class="chip" onclick="setQuery('Python Programming')">🐍 Python Code</button>
+            <button type="button" class="chip" onclick="setQuery('SpaceX')">🚀 SpaceX</button>
         </div>
     </div>
+
+    <script>
+        function setQuery(term) {
+            const input = document.getElementById('queryInput');
+            input.value = term;
+            document.getElementById('searchForm').submit();
+        }
+    </script>
 
 </body>
 </html>
